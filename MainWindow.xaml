@@ -9,9 +9,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Search Bar -->
+        <!-- Search Bar and Reset Button -->
         <StackPanel Orientation="Horizontal" Margin="10">
-            <TextBox Name="SearchTextBox" Width="400" Height="30" Text="Enter file name or location..." TextChanged="SearchTextBox_TextChanged" />
+            <TextBox Name="SearchTextBox" Width="300" Height="30" Text="Enter file name or location..." TextChanged="SearchTextBox_TextChanged" />
+            <Button Name="ResetIndexButton" Content="Reset Index" Width="100" Click="ResetIndexButton_Click" Margin="5,0,0,0"/>
         </StackPanel>
 
         <!-- Loading Spinner -->
@@ -32,13 +33,21 @@
         </Grid>
 
         <!-- ListView to display search results -->
-        <ListView Name="ResultsListView" Grid.Row="2" Margin="10">
+        <ListView Name="ResultsListView" Grid.Row="2" Margin="10" MouseRightButtonDown="ResultsListView_MouseRightButtonDown">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="File Name" DisplayMemberBinding="{Binding Name}" Width="200"/>
                     <GridViewColumn Header="File Path" DisplayMemberBinding="{Binding Path}" Width="300"/>
                 </GridView>
             </ListView.View>
+
+            <!-- Context Menu -->
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Open File" Click="OpenFileMenuItem_Click" />
+                    <MenuItem Header="Open File Location" Click="OpenFileLocationMenuItem_Click" />
+                </ContextMenu>
+            </ListView.ContextMenu>
         </ListView>
     </Grid>
 </Window>

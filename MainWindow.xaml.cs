@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics; // For Process to open files
 using System.IO;
 using System.Linq;
 using System.Text.Json; // For JSON serialization
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input; // For MouseButtonEventArgs
 using System.Windows.Media.Animation;
 
 namespace FileSearchApp
@@ -227,6 +229,70 @@ namespace FileSearchApp
         {
             var storyboard = (Storyboard)LoadingSpinner.Resources["SpinStoryboard"];
             storyboard.Stop();
+        }
+
+        // Event handler for the right-click context menu
+        private void ResultsListView_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ResultsListView.SelectedItem == null)
+            {
+                ResultsListView.UnselectAll();
+            }
+        }
+
+        // Event handler for the Open File menu item
+        private void OpenFileMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (ResultsListView.SelectedItem is FileInfoDisplay selectedFile)
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(selectedFile.Path) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error opening file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        // Event handler for the Open File Location menu item
+        private void OpenFileLocationMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (ResultsListView.SelectedItem is FileInfoDisplay selectedFile)
+            {
+                try
+                {
+                    string folderPath = Path.GetDirectoryName(selectedFile.Path);
+                    Process.Start(new ProcessStartInfo("explorer.exe", folderPath) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error opening file location: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        // Event handler for the Reset Index button click
+        private async void ResetIndexButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Confirm the action
+            var result = MessageBox.Show("Are you sure you want to reset the index and start a new indexing process?", 
+                                          "Confirm Reset", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.Yes)
+            {
+                // Delete the existing index file if it exists
+                if (File.Exists(IndexFilePath))
+                {
+                    File.Delete(IndexFilePath);
+                }
+
+                // Clear the previous file index
+                fileIndex.Clear();
+
+                // Start the indexing process
+                await IndexFilesAsync();
+            }
         }
     }
 }
